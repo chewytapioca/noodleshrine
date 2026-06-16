@@ -35,7 +35,7 @@ import { RAMEN } from './ramen.js';
 // ── scrypt params ─────────────────────────────────────────────────────
 // N=2^17 (~128 MB RAM, ~0.5 s on a modern CPU) — hard to brute-force,
 // acceptable for a login endpoint that is rarely called.
-const SCRYPT_PARAMS = { N: 1 << 17, r: 8, p: 1 };
+const SCRYPT_PARAMS = { N: 1 << 14, r: 8, p: 1 };
 const SCRYPT_KEYLEN = 64;  // bytes → 128 hex chars
 const SALT_BYTES    = 32;  // 256-bit salt
 const TOKEN_BYTES   = 48;  // 384-bit token → 96 hex chars
