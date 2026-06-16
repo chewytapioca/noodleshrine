@@ -1,7 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  serverExternalPackages: ['@neondatabase/serverless'],
+  experimental: {
+    serverComponentsExternalPackages: ['@neondatabase/serverless', 'bad-words'],
+  },
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {

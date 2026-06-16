@@ -31,7 +31,7 @@
 import { neon }  from '@neondatabase/serverless';
 import crypto    from 'node:crypto';
 import { RAMEN } from './ramen.js';
-import Filter    from 'bad-words';
+import { Filter } from 'bad-words';
 
 const profanityFilter = new Filter();
 
