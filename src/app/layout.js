@@ -1,10 +1,15 @@
 import './globals.css';
-
+ 
+// Polyfill webkitURL for Next.js 15 server-side rendering
+if (typeof globalThis.webkitURL === 'undefined') {
+  globalThis.webkitURL = typeof URL !== 'undefined' ? URL : {};
+}
+ 
 export const metadata = {
   title: 'noodle shrine ʕ•ᴥ•ʔ',
   description: 'community-rated instant ramen — slurp, score, repeat',
 };
-
+ 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
@@ -20,3 +25,4 @@ export default function RootLayout({ children }) {
     </html>
   );
 }
+ 
