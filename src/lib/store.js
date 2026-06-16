@@ -275,6 +275,8 @@ export async function postComment({ token, ramenId, text }) {
   `;
   return true;
 }
+
+export async function rate({ token, ramenId, score }) {
   const user = await getUserBySession(token);
   if (!user) throw new Error('not signed in');
 
@@ -293,3 +295,4 @@ export async function postComment({ token, ramenId, text }) {
   `;
 
   return true;
+}
