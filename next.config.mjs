@@ -2,10 +2,18 @@
 const nextConfig = {
   reactStrictMode: true,
   serverExternalPackages: ['@neondatabase/serverless'],
-  experimental: {
-    serverActions: {
-      allowedOrigins: ['*'],
-    },
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        net: false,
+        tls: false,
+        fs: false,
+        crypto: false,
+        stream: false,
+      };
+    }
+    return config;
   },
 };
 
