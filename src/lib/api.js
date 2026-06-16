@@ -22,4 +22,8 @@ export const api = {
   getBoard: () => json('/api/board'),
   rate: (ramenId, score) =>
     json('/api/rate', { method: 'POST', body: { ramenId, score } }),
+  getComments: (ramenId) =>
+    json(`/api/comments?ramenId=${encodeURIComponent(ramenId)}`),
+  postComment: (ramenId, text) =>
+    json('/api/comments', { method: 'POST', body: { ramenId, text } }),
 };

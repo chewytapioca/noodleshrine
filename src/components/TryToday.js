@@ -42,22 +42,6 @@ export default function TryToday() {
                   <span className="score">{avg}<small>/10</small></span>
                 </div>
                 <div className="card-desc">{r.maker} · {heatLabel(r.heat)}</div>
-                {r.comments && r.comments.length > 0 && (
-                  <div className="card-notes">
-                    <div className="card-notes-hd">NOTES ♡</div>
-                    {r.comments.slice(0, 3).map((c, i) => (
-                      <div className="card-note" key={i}>
-                        <div className="card-note-avi" style={{ background: c.color }}>
-                          {c.user.slice(0, 2).toUpperCase()}
-                        </div>
-                        <div className="card-note-body">
-                          <span className="card-note-user">@{c.user}</span>
-                          <span className="card-note-text">{c.text}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
                 <div className="card-bottom">
                   <span className="card-meta">{b.count || 0} VOTES</span>
                   <button

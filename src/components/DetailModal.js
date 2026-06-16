@@ -11,17 +11,21 @@ export default function DetailModal() {
   const [hover, setHover]       = useState(0);
   const [pending, setPending]   = useState(0);
   const [newNote, setNewNote]   = useState('');
-  const [localComments, setLocalComments] = useState({});  // id -> extra comments
+  const [comments, setComments] = useState([]);
+  const [posting, setPosting]   = useState(false);
 
   const ramen = useMemo(() => RAMEN.find((r) => r.id === detailId), [detailId]);
   const b = board[detailId] || { avg: 0, count: 0, mine: null };
 
-  // reset transient state when opening a different ramen
+  // load real comments whenever ramen changes
   useEffect(() => {
-    setHover(0); setPending(0); setNewNote('');
+    setHover(0); setPending(0); setNewNote(''); setComments([]);
+    if (!detailId) return;
+    api.getComments(detailId)
+      .then(({ comments }) => setComments(comments || []))
+      .catch(() => {});
   }, [detailId]);
 
-  // ESC to close
   useEffect(() => {
     function onKey(e) { if (e.key === 'Escape') closeDetail(); }
     document.addEventListener('keydown', onKey);
@@ -34,9 +38,7 @@ export default function DetailModal() {
   const displayed = hover || myScore;
   const avg       = b.avg ? b.avg.toFixed(1) : '—';
   const barW      = b.avg ? Math.round(b.avg * 10) : 0;
-
-  const comments  = [...(ramen.comments || []), ...(localComments[ramen.id] || [])];
-  const tags      = ramen.tags.filter((t) => !['Samyang', 'Nongshim', 'Nissin'].includes(t));
+  const tags      = ramen.tags.filter((t) => !['Samyang', 'Nongshim', 'Nissin', 'Indomie', 'MAMA', 'Maruchan', 'Sanyo', 'Ippudo', 'Nestle', 'MyKuali'].includes(t));
 
   const save = async () => {
     if (!pending) return;
@@ -44,23 +46,25 @@ export default function DetailModal() {
       await api.rate(ramen.id, pending);
       await refresh();
       setPending(0);
-    } catch (e) {
-      console.error(e);
+    } catch {
+      // rating failed silently — user can retry
     }
   };
 
-  const post = () => {
+  const post = async () => {
     const txt = newNote.trim();
-    if (!txt || !user) return;
-    setLocalComments((prev) => ({
-      ...prev,
-      [ramen.id]: [...(prev[ramen.id] || []), {
-        user,
-        color: PALETTE[(comments.length) % PALETTE.length],
-        text: txt,
-      }],
-    }));
-    setNewNote('');
+    if (!txt || !user || posting) return;
+    setPosting(true);
+    try {
+      await api.postComment(ramen.id, txt);
+      const { comments: fresh } = await api.getComments(ramen.id);
+      setComments(fresh || []);
+      setNewNote('');
+    } catch {
+      // post failed silently — user can retry
+    } finally {
+      setPosting(false);
+    }
   };
 
   return (
@@ -128,11 +132,11 @@ export default function DetailModal() {
         ) : (
           comments.map((c, i) => (
             <div key={i} className="comment">
-              <div className="avi" style={{ background: c.color }}>
-                {c.user.slice(0, 2).toUpperCase()}
+              <div className="avi" style={{ background: PALETTE[i % PALETTE.length] }}>
+                {c.username.slice(0, 2).toUpperCase()}
               </div>
               <div>
-                <div className="comment-user">@{c.user}</div>
+                <div className="comment-user">@{c.username}</div>
                 <div className="comment-text">{c.text}</div>
               </div>
             </div>
@@ -147,8 +151,11 @@ export default function DetailModal() {
               onChange={(e) => setNewNote(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') post(); }}
               placeholder="drop a note ♡"
+              disabled={posting}
             />
-            <button className="post-btn" onClick={post}>POST</button>
+            <button className="post-btn" onClick={post} disabled={posting}>
+              {posting ? '...' : 'POST'}
+            </button>
           </div>
         )}
       </div>

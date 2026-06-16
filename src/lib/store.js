@@ -249,7 +249,32 @@ export async function getBoard(currentUsername = null) {
   return board;
 }
 
-export async function rate({ token, ramenId, score }) {
+export async function getComments(ramenId) {
+  const rows = await db()`
+    SELECT username, text, created_at
+    FROM comments
+    WHERE ramen_id = ${ramenId}
+    ORDER BY created_at ASC
+    LIMIT 100
+  `;
+  return rows;
+}
+
+export async function postComment({ token, ramenId, text }) {
+  const user = await getUserBySession(token);
+  if (!user) throw new Error('not signed in');
+
+  text = (text || '').trim();
+  if (!text)          throw new Error('comment cannot be empty');
+  if (text.length > 500) throw new Error('comment too long (max 500 chars)');
+  if (!VALID_RAMEN_IDS.has(ramenId)) throw new Error('unknown ramen');
+
+  await db()`
+    INSERT INTO comments (username, ramen_id, text)
+    VALUES (${user.username}, ${ramenId}, ${text})
+  `;
+  return true;
+}
   const user = await getUserBySession(token);
   if (!user) throw new Error('not signed in');
 
@@ -268,4 +293,3 @@ export async function rate({ token, ramenId, score }) {
   `;
 
   return true;
-}
