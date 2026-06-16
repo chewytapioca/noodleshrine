@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 'use client';
 import { ShrineProvider } from '@/lib/shrine-context';
 import Nav from '@/components/Nav';
