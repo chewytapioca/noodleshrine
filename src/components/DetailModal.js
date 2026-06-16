@@ -13,13 +13,14 @@ export default function DetailModal() {
   const [newNote, setNewNote]   = useState('');
   const [comments, setComments] = useState([]);
   const [posting, setPosting]   = useState(false);
+  const [postErr, setPostErr]   = useState('');
 
   const ramen = useMemo(() => RAMEN.find((r) => r.id === detailId), [detailId]);
   const b = board[detailId] || { avg: 0, count: 0, mine: null };
 
   // load real comments whenever ramen changes
   useEffect(() => {
-    setHover(0); setPending(0); setNewNote(''); setComments([]);
+    setHover(0); setPending(0); setNewNote(''); setComments([]); setPostErr('');
     if (!detailId) return;
     api.getComments(detailId)
       .then(({ comments }) => setComments(comments || []))
@@ -55,13 +56,14 @@ export default function DetailModal() {
     const txt = newNote.trim();
     if (!txt || !user || posting) return;
     setPosting(true);
+    setPostErr('');
     try {
       await api.postComment(ramen.id, txt);
       const { comments: fresh } = await api.getComments(ramen.id);
       setComments(fresh || []);
       setNewNote('');
-    } catch {
-      // post failed silently — user can retry
+    } catch (e) {
+      setPostErr(e.message || 'could not post note');
     } finally {
       setPosting(false);
     }
@@ -144,18 +146,23 @@ export default function DetailModal() {
         )}
 
         {user && (
-          <div className="comment-row">
-            <input
-              className="comment-input"
-              value={newNote}
-              onChange={(e) => setNewNote(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') post(); }}
-              placeholder="drop a note ♡"
-              disabled={posting}
-            />
-            <button className="post-btn" onClick={post} disabled={posting}>
-              {posting ? '...' : 'POST'}
-            </button>
+          <div className="comment-row-wrap">
+            <div className="comment-row">
+              <input
+                className="comment-input"
+                value={newNote}
+                onChange={(e) => { setNewNote(e.target.value); setPostErr(''); }}
+                onKeyDown={(e) => { if (e.key === 'Enter') post(); }}
+                placeholder="drop a note ♡"
+                disabled={posting}
+              />
+              <button className="post-btn" onClick={post} disabled={posting}>
+                {posting ? '...' : 'POST'}
+              </button>
+            </div>
+            {postErr && (
+              <p style={{ fontSize: '.76rem', color: 'var(--hot)', marginTop: 6 }}>{postErr}</p>
+            )}
           </div>
         )}
       </div>

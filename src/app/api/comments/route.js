@@ -21,7 +21,7 @@ export async function POST(req) {
     await postComment({ token, ramenId, text });
     return NextResponse.json({ ok: true });
   } catch (err) {
-    const safe = ['not signed in', 'comment cannot be empty', 'comment too long (max 500 chars)', 'unknown ramen'];
+    const safe = ['not signed in', 'comment cannot be empty', 'comment too long (max 500 chars)', 'unknown ramen', 'please keep notes respectful ʕ•ᴥ•ʔ'];
     const msg = safe.includes(err.message) ? err.message : 'something went wrong';
     return NextResponse.json({ error: msg }, { status: 400 });
   }

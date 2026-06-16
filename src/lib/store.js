@@ -31,6 +31,9 @@
 import { neon }  from '@neondatabase/serverless';
 import crypto    from 'node:crypto';
 import { RAMEN } from './ramen.js';
+import Filter    from 'bad-words';
+
+const profanityFilter = new Filter();
 
 // ── scrypt params ─────────────────────────────────────────────────────
 // N=2^17 (~128 MB RAM, ~0.5 s on a modern CPU) — hard to brute-force,
@@ -265,9 +268,10 @@ export async function postComment({ token, ramenId, text }) {
   if (!user) throw new Error('not signed in');
 
   text = (text || '').trim();
-  if (!text)          throw new Error('comment cannot be empty');
+  if (!text)             throw new Error('comment cannot be empty');
   if (text.length > 500) throw new Error('comment too long (max 500 chars)');
   if (!VALID_RAMEN_IDS.has(ramenId)) throw new Error('unknown ramen');
+  if (profanityFilter.isProfane(text)) throw new Error('please keep notes respectful ʕ•ᴥ•ʔ');
 
   await db()`
     INSERT INTO comments (username, ramen_id, text)
